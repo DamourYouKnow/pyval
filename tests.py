@@ -6,6 +6,7 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual(evaluate("(2 + 3) * 5"), 25)
         self.assertEqual(evaluate("2 + 3 * 5"), 17)
         self.assertEqual(evaluate("(4 - 6) * ((4 - 2) * 2)"), -8)
+        self.assertEqual(evaluate("(4 ** (2 + 1)) + (4 ** (2 + 1))"), 128)
 
 
 if __name__ == '__main__':

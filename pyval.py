@@ -4,15 +4,21 @@ operators = {
     '+': (lambda a, b: a + b),
     '-': (lambda a, b: a - b),
     '*': (lambda a, b: a * b),
-    '/': (lambda a, b: a / b)
+    '/': (lambda a, b: a / b),
+    '**': (lambda a, b:  a ** b),
+    '^': (lambda a, b: a ** b)
 }
 
 priorities = {
     '+': 1,
     '-': 1,
     '*': 2,
-    '/': 2
+    '/': 2,
+    '**': 3,
+    '^': 3
 }
+
+op_chars = {char for op in operators for char in op}
 
 
 def evaluate(expression):
@@ -43,7 +49,7 @@ class ExpressionNode:
             return _to_number(self.value)
         else:
             return operators[self.value](
-                    self.left.result(), self.right.result())
+                    self.right.result(), self.left.result())
 
 
 def _postfix(tokens):
@@ -76,21 +82,37 @@ def _priority(token):
 
 def _parse_tokens(exp):
     tokens = []
-    last_num = ""
+    next_token = ""
+    last_token_type = None
+    c = 1
 
     for char in exp:
-        if char in operators or char in ('(', ')'):
-            if last_num:
-                tokens.append(last_num)
-                last_num = ""
-            tokens.append(char)
+        curr_token_type = _token_type(char, c)
+
+        if last_token_type == None or last_token_type == curr_token_type:
+            next_token += char
         else:
-            last_num += char
+            tokens.append(next_token)
+            next_token = char
 
-    if last_num:
-        tokens.append(last_num)
+        last_token_type = curr_token_type
+        c += 1
 
+    if next_token:
+        tokens.append(next_token)
+        
     return tokens
+
+
+def _token_type(char, c):
+    if _is_number(char) or char == '.':
+        return 1
+    elif char in op_chars:
+        return 2
+    elif char in ('(', ')'):
+        return 10 * c
+    else:
+        raise ValueError("Unrecognized character '" + char + "'")
 
 
 def _to_number(str):
