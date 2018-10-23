@@ -83,36 +83,38 @@ def _priority(token):
 def _parse_tokens(exp):
     tokens = []
     next_token = ""
-    last_token_type = None
-    c = 1
+    pos = 0
 
-    for char in exp:
-        curr_token_type = _token_type(char, c)
-
-        if last_token_type == None or last_token_type == curr_token_type:
-            next_token += char
+    while pos < len(exp):
+        if _is_number(exp[pos]):
+            next_token, pos = _read_next_value(exp, pos)
+        elif exp[pos] in op_chars:
+            next_token, pos = _read_next_operator(exp, pos)
+        elif exp[pos] in ('(', ')'):
+            next_token = exp[pos]
         else:
-            tokens.append(next_token)
-            next_token = char
+            raise ValueError("Unrecognized character at position " + str(pos))
 
-        last_token_type = curr_token_type
-        c += 1
-
-    if next_token:
         tokens.append(next_token)
-        
+        pos += 1
+    
     return tokens
 
 
-def _token_type(char, c):
-    if _is_number(char) or char == '.':
-        return 1
-    elif char in op_chars:
-        return 2
-    elif char in ('(', ')'):
-        return 10 * c
-    else:
-        raise ValueError("Unrecognized character '" + char + "'")
+def _read_next_value(exp, pos):
+    token = ""
+    while pos < len(exp) and (_is_number(exp[pos]) or exp[pos] == '.'):
+        token += exp[pos]
+        pos += 1
+    return token, pos - 1
+
+
+def _read_next_operator(exp, pos):
+    token = ""
+    while (pos < len(exp) and exp[pos] in op_chars):
+        token += exp[pos]
+        pos += 1
+    return token, pos - 1
 
 
 def _to_number(str):
